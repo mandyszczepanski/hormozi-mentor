@@ -6,6 +6,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { getDb, initSchema } from "./db/init";
 import { registerTools } from "./mcp/tools";
 import { refreshYouTube } from "./cron/youtube-refresh";
+import { query } from "./query/rag";
 
 const PORT = parseInt(process.env.PORT || "3456");
 const USE_STDIO = process.argv.includes("--stdio");
@@ -38,6 +39,18 @@ async function main() {
         db.prepare("SELECT COUNT(*) as n FROM chunks").get() as { n: number }
       ).n;
       res.json({ status: "ok", chunks: chunkCount });
+    });
+
+    app.post("/query", async (req, res) => {
+      try {
+        const { question, context, limit } = req.body;
+        if (!question) return res.status(400).json({ error: "question required" });
+        const result = await query(db, question, context, limit ?? 8);
+        res.json(result);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        res.status(500).json({ error: msg });
+      }
     });
 
     app.listen(PORT, () => {
