@@ -1,7 +1,7 @@
 const VOYAGE_API_KEY = process.env.VOYAGE_API_KEY;
 const VOYAGE_API_URL = "https://api.voyageai.com/v1/embeddings";
 const MODEL = "voyage-3-lite";
-const DIMENSIONS = 1024;
+const DIMENSIONS = 512;
 const BATCH_SIZE = 128;
 
 async function callVoyage(inputs: string[]): Promise<number[][]> {

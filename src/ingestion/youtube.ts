@@ -5,7 +5,7 @@ import Database from "better-sqlite3";
 import { chunkText, estimateTokens } from "./chunk";
 import { embedBatch } from "../embeddings/voyage";
 
-const CHANNEL_ID = "UCczLT9lDzdE-i0FaTiJpVqQ"; // Alex Hormozi
+const CHANNEL_ID = "UCUyDOdBWhC1MCxEjC46d-zw"; // Alex Hormozi
 const MIN_DURATION_SECONDS = 300; // 5 min — exclude Shorts
 
 interface VideoMeta {

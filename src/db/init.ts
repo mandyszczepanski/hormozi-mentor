@@ -15,8 +15,13 @@ export function getDb(): Database.Database {
       // Common macOS paths for sqlite-vec
       "/opt/homebrew/lib/sqlite-vec.dylib",
       "/usr/local/lib/sqlite-vec.dylib",
-      // Try local node_modules if sqlite-vec npm package installed
+      // __dirname-relative paths (works regardless of PM2 cwd)
+      path.join(__dirname, "../../node_modules/sqlite-vec-darwin-arm64/vec0.dylib"),
+      path.join(__dirname, "../../../node_modules/sqlite-vec-darwin-arm64/vec0.dylib"),
+      path.join(__dirname, "../../node_modules/sqlite-vec/vec0.dylib"),
+      // process.cwd()-relative fallbacks
       path.join(process.cwd(), "node_modules", "sqlite-vec", "vec0.dylib"),
+      path.join(process.cwd(), "node_modules", "sqlite-vec-darwin-arm64", "vec0.dylib"),
     ];
     let loaded = false;
     for (const p of extensionPaths) {
@@ -77,7 +82,7 @@ export function initSchema(db: Database.Database): void {
     db.exec(`
       CREATE VIRTUAL TABLE IF NOT EXISTS chunk_embeddings USING vec0(
         chunk_id TEXT PRIMARY KEY,
-        embedding FLOAT[1024]
+        embedding FLOAT[512]
       );
     `);
     console.log("chunk_embeddings virtual table ready");

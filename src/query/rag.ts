@@ -1,8 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { spawnSync } from "child_process";
 import Database from "better-sqlite3";
 import { embed } from "../embeddings/voyage";
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const SYSTEM_PROMPT = `You are channeling Alex Hormozi — his direct, no-BS, data-driven business style.
 Speak in his voice: blunt, confident, specific, example-driven.
@@ -91,15 +89,24 @@ export async function query(
     ? `User context: ${context}\n\nSource material:\n${contextBlocks}\n\nQuestion: ${question}`
     : `Source material:\n${contextBlocks}\n\nQuestion: ${question}`;
 
-  const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
-  });
-
-  const answer =
-    message.content[0].type === "text" ? message.content[0].text : "";
+  const prompt = `${SYSTEM_PROMPT}\n\n${userMessage}`;
+  const env = { ...process.env };
+  delete env.CLAUDECODE;
+  delete env.CLAUDE_CODE_ENTRYPOINT;
+  delete env.CLAUDE_CODE_CHILD_SESSION;
+  delete env.CLAUDE_CODE_SESSION_ID;
+  delete env.ANTHROPIC_API_KEY;
+  delete env.ANTHROPIC_AUTH_TOKEN;
+  const result = spawnSync(
+    "/opt/homebrew/bin/claude",
+    ["-p", prompt, "--model", "claude-sonnet-4-6", "--output-format", "text"],
+    { encoding: "utf8", timeout: 60000, env }
+  );
+  if (result.error || result.status !== 0) {
+    const errDetail = result.stderr || result.stdout || result.error?.message || `exit ${result.status}`;
+    throw new Error(`claude CLI failed: ${errDetail}`);
+  }
+  const answer = result.stdout.trim();
 
   // Deduplicate sources
   const seenUrls = new Set<string>();
