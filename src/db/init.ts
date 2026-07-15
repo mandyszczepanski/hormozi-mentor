@@ -11,11 +11,17 @@ export function getDb(): Database.Database {
 
   // Load sqlite-vec extension
   try {
+    const ext = process.platform === 'darwin' ? 'vec0.dylib' : 'vec0.so';
     const extensionPaths = [
       // Common macOS paths for sqlite-vec
       "/opt/homebrew/lib/sqlite-vec.dylib",
       "/usr/local/lib/sqlite-vec.dylib",
+      // Linux system paths
+      "/usr/local/lib/vec0.so",
+      "/usr/lib/sqlite-vec/vec0.so",
       // __dirname-relative paths (works regardless of PM2 cwd)
+      path.join(__dirname, `../../extensions/${ext}`),
+      path.join(__dirname, `../../../extensions/${ext}`),
       path.join(__dirname, "../../node_modules/sqlite-vec-darwin-arm64/vec0.dylib"),
       path.join(__dirname, "../../../node_modules/sqlite-vec-darwin-arm64/vec0.dylib"),
       path.join(__dirname, "../../node_modules/sqlite-vec/vec0.dylib"),

@@ -1,0 +1,2 @@
+# Place vec0.so (Linux) or vec0.dylib (macOS) here.
+# These binary files are gitignored.

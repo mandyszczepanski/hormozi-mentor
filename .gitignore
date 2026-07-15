@@ -4,3 +4,5 @@ dist/
 *.db
 books/
 *.pdf
+extensions/vec0.so
+extensions/vec0.dylib
